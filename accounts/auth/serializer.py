@@ -1,5 +1,6 @@
 """Serializer for registering (and later logging in) users."""
 
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -41,3 +42,18 @@ class RegistrationSerializer(serializers.Serializer):
         )
         Profile.objects.create(user=user, type=validated_data["type"])
         return user
+
+
+class LoginSerializer(serializers.Serializer):
+    """Validates login credentials against Django's authentication backend."""
+
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        """Authenticate the user and attach it to validated_data if successful."""
+        user = authenticate(username=data["username"], password=data["password"])
+        if user is None:
+            raise serializers.ValidationError("Invalid username or password.")
+        data["user"] = user
+        return data
