@@ -52,3 +52,39 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class BusinessProfileListSerializer(serializers.ModelSerializer):
+    """Represents a single business profile for the business-profiles list."""
+
+    user = serializers.IntegerField(source="user.id", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    first_name = serializers.CharField(source="user.first_name", read_only=True)
+    last_name = serializers.CharField(source="user.last_name", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+            "type",
+        ]
+
+
+class CustomerProfileListSerializer(serializers.ModelSerializer):
+    """Represents a single customer profile for the customer-profiles list."""
+
+    user = serializers.IntegerField(source="user.id", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    uploaded_at = serializers.DateTimeField(source="created_at", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ["user", "username", "file", "uploaded_at", "type"]

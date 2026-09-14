@@ -4,7 +4,11 @@ from rest_framework import generics, permissions
 
 from ..models import Profile
 from .permissions import IsOwnerOrReadOnly
-from .serializer import ProfileSerializer
+from .serializer import (
+    ProfileSerializer,
+    BusinessProfileListSerializer,
+    CustomerProfileListSerializer,
+)
 
 
 class ProfileDetailView(generics.RetrieveUpdateAPIView):
@@ -15,3 +19,19 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     lookup_field = "user__pk"
     lookup_url_kwarg = "pk"
+
+
+class BusinessProfileListView(generics.ListAPIView):
+    """Lists all business profiles on the platform."""
+
+    queryset = Profile.objects.filter(type="business")
+    serializer_class = BusinessProfileListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class CustomerProfileListView(generics.ListAPIView):
+    """Lists all customer profiles on the platform."""
+
+    queryset = Profile.objects.filter(type="customer")
+    serializer_class = CustomerProfileListSerializer
+    permission_classes = [permissions.IsAuthenticated]
