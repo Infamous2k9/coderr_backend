@@ -71,6 +71,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = "core.urls"
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
