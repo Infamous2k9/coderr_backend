@@ -58,3 +58,55 @@ class OfferCreateSerializer(serializers.ModelSerializer):
             OfferDetail.objects.create(offer=offer, **detail_data)
 
         return offer
+
+
+class UserDetailsSerializer(serializers.Serializer):
+    """Minimal representation of the offer's creator, embedded in offer lists."""
+
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+    username = serializers.CharField(source="user.username")
+
+
+class OfferDetailLinkSerializer(serializers.Serializer):
+    """Represents a single detail as {id, url} instead of the full object."""
+
+    id = serializers.IntegerField()
+    url = serializers.SerializerMethodField()
+
+    def get_url(self, obj):
+        """Build the relative URL pointing to this detail's own endpoint."""
+        return f"/offerdetails/{obj.id}/"
+
+
+class OfferListSerializer(serializers.ModelSerializer):
+    """Represents an Offer in the list view, with aggregated price/delivery info."""
+
+    details = OfferDetailLinkSerializer(many=True, read_only=True)
+    min_price = serializers.SerializerMethodField()
+    min_delivery_time = serializers.SerializerMethodField()
+    user_details = UserDetailsSerializer(source="*", read_only=True)
+
+    class Meta:
+        model = Offer
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time",
+            "user_details",
+        ]
+
+    def get_min_price(self, obj):
+        """Return the lowest price among this offer's details."""
+        return min(detail.price for detail in obj.details.all())
+
+    def get_min_delivery_time(self, obj):
+        """Return the shortest delivery time among this offer's details."""
+        return min(detail.delivery_time_in_days for detail in obj.details.all())
