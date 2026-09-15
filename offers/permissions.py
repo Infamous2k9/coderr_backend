@@ -13,3 +13,13 @@ class IsBusinessUser(permissions.BasePermission):
             and hasattr(request.user, "profile")
             and request.user.profile.type == "business"
         )
+
+
+class IsOfferOwner(permissions.BasePermission):
+    """Allows write access only to the user who created the offer."""
+
+    def has_object_permission(self, request, view, obj):
+        """Return True for safe methods, or if the request user owns the offer."""
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user == request.user

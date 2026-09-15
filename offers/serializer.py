@@ -110,3 +110,76 @@ class OfferListSerializer(serializers.ModelSerializer):
     def get_min_delivery_time(self, obj):
         """Return the shortest delivery time among this offer's details."""
         return min(detail.delivery_time_in_days for detail in obj.details.all())
+
+
+class OfferDetailUpdateSerializer(serializers.ModelSerializer):
+    """Represents a detail update, identified by offer_type instead of id."""
+
+    class Meta:
+        model = OfferDetail
+        fields = [
+            "title",
+            "revisions",
+            "delivery_time_in_days",
+            "price",
+            "features",
+            "offer_type",
+        ]
+
+
+class OfferUpdateSerializer(serializers.ModelSerializer):
+    """Updates an Offer and, optionally, one or more of its details by offer_type."""
+
+    details = OfferDetailUpdateSerializer(many=True, required=False)
+
+    class Meta:
+        model = Offer
+        fields = ["id", "title", "image", "description", "details"]
+        read_only_fields = ["id"]
+
+    def update(self, instance, validated_data):
+        """Update simple Offer fields directly, and matching details by offer_type."""
+        details_data = validated_data.pop("details", [])
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        for detail_data in details_data:
+            offer_type = detail_data.pop("offer_type")
+            OfferDetail.objects.filter(offer=instance, offer_type=offer_type).update(
+                **detail_data
+            )
+
+        return instance
+
+
+class OfferRetrieveSerializer(serializers.ModelSerializer):
+    """Represents a single Offer with detail links and aggregated price/delivery info."""
+
+    details = OfferDetailLinkSerializer(many=True, read_only=True)
+    min_price = serializers.SerializerMethodField()
+    min_delivery_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Offer
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time",
+        ]
+
+    def get_min_price(self, obj):
+        """Return the lowest price among this offer's details."""
+        return min(detail.price for detail in obj.details.all())
+
+    def get_min_delivery_time(self, obj):
+        """Return the shortest delivery time among this offer's details."""
+        return min(detail.delivery_time_in_days for detail in obj.details.all())

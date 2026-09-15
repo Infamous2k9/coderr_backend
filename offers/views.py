@@ -4,9 +4,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, permissions
 
 from .filters import OfferFilter
-from .models import Offer
-from .permissions import IsBusinessUser
-from .serializer import OfferCreateSerializer, OfferListSerializer
+from .models import Offer, OfferDetail
+from .permissions import IsBusinessUser, IsOfferOwner
+from .serializer import (
+    OfferCreateSerializer,
+    OfferDetailSerializer,
+    OfferListSerializer,
+    OfferRetrieveSerializer,
+    OfferUpdateSerializer,
+)
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -34,3 +40,24 @@ class OfferListCreateView(generics.ListCreateAPIView):
         if self.request.method == "POST":
             return [permissions.IsAuthenticated(), IsBusinessUser()]
         return [permissions.IsAuthenticated()]
+
+
+class OfferDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieves, updates, or deletes a single offer."""
+
+    queryset = Offer.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsOfferOwner]
+
+    def get_serializer_class(self):
+        """Use the update-serializer for PATCH, the retrieve-serializer otherwise."""
+        if self.request.method == "PATCH":
+            return OfferUpdateSerializer
+        return OfferRetrieveSerializer
+
+
+class OfferDetailRetrieveView(generics.RetrieveAPIView):
+    """Retrieves a single pricing-tier detail (basic/standard/premium) by id."""
+
+    queryset = OfferDetail.objects.all()
+    serializer_class = OfferDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
