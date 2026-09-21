@@ -1,7 +1,8 @@
 """Views for listing, creating, and retrieving offers."""
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, permissions
+from rest_framework import filters, generics, permissions, status
+from rest_framework.response import Response
 
 from .filters import OfferFilter
 from .models import Offer, OfferDetail
@@ -29,6 +30,20 @@ class OfferListCreateView(generics.ListCreateAPIView):
     ordering_fields = ["updated_at", "min_price"]
     ordering = ["-updated_at"]
 
+    def list(self, request, *args, **kwargs):
+        """Validate numeric query params before filtering; reject invalid values with 400."""
+        for param in ["min_price", "max_delivery_time"]:
+            value = request.query_params.get(param)
+            if value is not None:
+                try:
+                    float(value)
+                except ValueError:
+                    return Response(
+                        {param: f"'{value}' is not a valid number."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+        return super().list(request, *args, **kwargs)
+
     def get_serializer_class(self):
         """Use the write-serializer for creating, the read-serializer for listing."""
         if self.request.method == "POST":
@@ -39,7 +54,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
         """Require business-user permission only for creating, not for listing."""
         if self.request.method == "POST":
             return [permissions.IsAuthenticated(), IsBusinessUser()]
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
 
 
 class OfferDetailView(generics.RetrieveUpdateDestroyAPIView):

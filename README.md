@@ -38,8 +38,8 @@ premium), and customer users can order and review them.
    Migrations are not tracked in version control, so they are generated on first setup:
 
 ```bash
-python manage.py makemigrations accounts offers orders reviews
-python manage.py migrate
+   python manage.py makemigrations accounts offers orders reviews
+   python manage.py migrate
 ```
 
 This creates db.sqlite3 in the project root.

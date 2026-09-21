@@ -113,11 +113,14 @@ class OfferListSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailUpdateSerializer(serializers.ModelSerializer):
-    """Represents a detail update, identified by offer_type instead of id."""
+    """Represents a detail update, identified by offer_type, with id in the output."""
+
+    id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = OfferDetail
         fields = [
+            "id",
             "title",
             "revisions",
             "delivery_time_in_days",
