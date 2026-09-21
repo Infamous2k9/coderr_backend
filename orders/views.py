@@ -15,6 +15,8 @@ from .serializer import OrderCreateSerializer, OrderSerializer
 class OrderListCreateView(generics.ListCreateAPIView):
     """Lists the current user's orders (as customer or business) or creates one."""
 
+    pagination_class = None
+
     def get_queryset(self):
         """Return only orders where the current user is customer or business partner."""
         user = self.request.user

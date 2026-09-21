@@ -12,6 +12,7 @@ from .serializer import ReviewSerializer
 class ReviewListCreateView(generics.ListCreateAPIView):
     """Lists all reviews (with filtering/ordering) or creates one (customers only)."""
 
+    pagination_class = None
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
