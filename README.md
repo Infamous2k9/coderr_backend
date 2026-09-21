@@ -20,24 +20,32 @@ premium), and customer users can order and review them.
 1. Clone the repository and navigate into the project folder.
 
 2. Create and activate a virtual environment:
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate   # Windows: .venv\Scripts\activate
    ```
 
 3. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 4. Set up your environment variables (see below).
 
-5. Apply migrations:
-   ```bash
-   python manage.py migrate
-   ```
+5. Create the database
+   Migrations are not tracked in version control, so they are generated on first setup:
+
+```bash
+python manage.py makemigrations accounts offers orders reviews
+python manage.py migrate
+```
+
+This creates db.sqlite3 in the project root.
 
 6. Create a superuser (for admin access):
+
    ```bash
    python manage.py createsuperuser
    ```
@@ -58,12 +66,12 @@ Copy `.env.template` to `.env` and fill in your own values:
 cp .env.template .env
 ```
 
-| Variable                | Description                                                 |
-|--------------------------|---------------------------------------------------------------|
-| `SECRET_KEY`            | Django's cryptographic signing key. Generate one with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
-| `DEBUG`                 | `True` for local development, `False` in production           |
-| `ALLOWED_HOSTS`         | Comma-separated list of allowed hostnames                     |
-| `CORS_ALLOWED_ORIGINS`  | Comma-separated list of allowed frontend origins (e.g. `http://127.0.0.1:5500` for a Live Server frontend) |
+| Variable               | Description                                                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SECRET_KEY`           | Django's cryptographic signing key. Generate one with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `DEBUG`                | `True` for local development, `False` in production                                                                                                                |
+| `ALLOWED_HOSTS`        | Comma-separated list of allowed hostnames                                                                                                                          |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins (e.g. `http://127.0.0.1:5500` for a Live Server frontend)                                                         |
 
 `.env` is git-ignored and must never be committed.
 
@@ -79,7 +87,7 @@ Authorization: Token <your-token>
 ## Main Endpoints
 
 | Endpoint                                   | Description                          |
-|---------------------------------------------|---------------------------------------|
+| ------------------------------------------ | ------------------------------------ |
 | `POST /api/registration/`                  | Register a new user                  |
 | `POST /api/login/`                         | Log in and receive an auth token     |
 | `GET/PATCH /api/profile/{pk}/`             | Retrieve or update a user profile    |
