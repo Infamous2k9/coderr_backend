@@ -18,10 +18,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from .views import base_info
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("accounts.auth.urls")),
     path("api/", include("accounts.profile.urls")),
     path("api/", include("offers.urls")),
     path("api/", include("orders.urls")),
+    path("api/", include("reviews.urls")),
+    path("api/base-info/", base_info, name="base-info"),
 ]
