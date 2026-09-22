@@ -15,6 +15,7 @@ from .serializer import (
     OfferRetrieveSerializer,
     OfferUpdateSerializer,
 )
+from .validators import validate_numeric_query_params
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -33,17 +34,12 @@ class OfferListCreateView(generics.ListCreateAPIView):
     ordering = ["-updated_at"]
 
     def list(self, request, *args, **kwargs):
-        """Validate numeric query params before filtering; reject invalid values with 400."""
-        for param in ["min_price", "max_delivery_time"]:
-            value = request.query_params.get(param)
-            if value is not None:
-                try:
-                    float(value)
-                except ValueError:
-                    return Response(
-                        {param: f"'{value}' is not a valid number."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+        """Reject invalid numeric query params with 400 before filtering."""
+        error = validate_numeric_query_params(
+            request.query_params, ["min_price", "max_delivery_time"]
+        )
+        if error:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
         return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
