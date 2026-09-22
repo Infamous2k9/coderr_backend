@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from .filters import OfferFilter
 from .models import Offer, OfferDetail
+from .pagination import OfferPagination
 from .permissions import IsBusinessUser, IsOfferOwner
 from .serializer import (
     OfferCreateSerializer,
@@ -19,6 +20,7 @@ from .serializer import (
 class OfferListCreateView(generics.ListCreateAPIView):
     """Lists all offers (GET, with filtering/search/ordering) or creates one (POST)."""
 
+    pagination_class = OfferPagination
     queryset = Offer.objects.all()
     filter_backends = [
         DjangoFilterBackend,
