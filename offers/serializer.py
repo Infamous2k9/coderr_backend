@@ -149,10 +149,22 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
         instance.save()
 
         for detail_data in details_data:
-            offer_type = detail_data.pop("offer_type")
-            OfferDetail.objects.filter(offer=instance, offer_type=offer_type).update(
-                **detail_data
-            )
+            offer_type = detail_data.pop("offer_type", None)
+            if offer_type is None:
+                raise serializers.ValidationError(
+                    {
+                        "details": "Each detail must include 'offer_type' to identify which one to update."
+                    }
+                )
+            updated_count = OfferDetail.objects.filter(
+                offer=instance, offer_type=offer_type
+            ).update(**detail_data)
+            if updated_count == 0:
+                raise serializers.ValidationError(
+                    {
+                        "details": f"No detail with offer_type '{offer_type}' exists on this offer."
+                    }
+                )
 
         return instance
 

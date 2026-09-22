@@ -90,4 +90,12 @@ class CustomerProfileListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["user", "username", "file", "uploaded_at", "type"]
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "uploaded_at",
+            "type",
+        ]
